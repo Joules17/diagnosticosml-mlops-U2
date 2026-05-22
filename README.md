@@ -35,7 +35,9 @@ github: https://github.com/Joules17/mlops-entrega1
 
 ### 2. Ejecutar el contenedor
 
-    docker run -p 8000:8000 clasificador-enfermedades
+    docker run -p 8000:8000 -v ./data:/app/data clasificador-enfermedades
+
+El flag `-v ./data:/app/data` monta una carpeta local `data/` donde se guardará `predicciones.txt` con el historial de predicciones.
 
 La API quedara disponible en: http://localhost:8000
 
@@ -56,6 +58,21 @@ Para la version ReDoc:
     http://localhost:8000/redoc
 
 ---
+## Endpoint `/reporte`
+
+- Metodo: GET
+- URL: http://localhost:8000/reporte
+
+Retorna estadísticas de todas las predicciones realizadas:
+
+| Campo | Descripcion |
+|-------|-------------|
+| `total_por_categoria` | Conteo de predicciones por cada categoría |
+| `ultimas_5` | Las últimas 5 predicciones con fecha y clasificación |
+| `fecha_ultima` | Fecha y hora de la última predicción |
+
+---
+
 ## Uso del endpoint `/predecir`
 
 - Metodo: POST
