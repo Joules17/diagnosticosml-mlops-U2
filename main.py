@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from typing import Optional
+from datetime import datetime
+from pathlib import Path
+from collections import Counter
 
 app = FastAPI(
     title="Clasificador de Enfermedades",
@@ -40,6 +43,14 @@ class DatosPaciente(BaseModel):
 
 
 ESTADOS = ["NO ENFERMO", "ENFERMEDAD LEVE", "ENFERMEDAD AGUDA", "ENFERMEDAD CRÓNICA", "ENFERMEDAD TERMINAL"]
+
+ARCHIVO_PREDICCIONES = Path("/app/data/predicciones.txt")
+
+
+def registrar_prediccion(clasificacion: str):
+    ARCHIVO_PREDICCIONES.parent.mkdir(parents=True, exist_ok=True)
+    with open(ARCHIVO_PREDICCIONES, "a", encoding="utf-8") as f:
+        f.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | {clasificacion}\n")
 
 
 def clasificar(datos: DatosPaciente) -> str:
@@ -85,7 +96,39 @@ def predecir(datos: DatosPaciente):
     - **ENFERMEDAD TERMINAL**: sumatoria >= 45
     """
     resultado = clasificar(datos)
+    registrar_prediccion(resultado)
     return {"clasificacion": resultado}
+
+
+@app.get(
+    "/reporte",
+    summary="Reporte de predicciones",
+    response_description="Estadísticas de predicciones realizadas",
+)
+def reporte():
+    """
+    Retorna estadísticas de todas las predicciones realizadas:
+
+    - **total_por_categoria**: conteo de predicciones por cada categoría
+    - **ultimas_5**: las últimas 5 predicciones con fecha y clasificación
+    - **fecha_ultima**: fecha y hora de la última predicción
+    """
+    if not ARCHIVO_PREDICCIONES.exists():
+        return {"total_por_categoria": {}, "ultimas_5": [], "fecha_ultima": None}
+
+    lineas = ARCHIVO_PREDICCIONES.read_text(encoding="utf-8").splitlines()
+    lineas = [l for l in lineas if l.strip()]
+
+    if not lineas:
+        return {"total_por_categoria": {}, "ultimas_5": [], "fecha_ultima": None}
+
+    registros = [{"fecha": l.split(" | ")[0], "clasificacion": l.split(" | ")[1]} for l in lineas]
+
+    return {
+        "total_por_categoria": dict(Counter(r["clasificacion"] for r in registros)),
+        "ultimas_5": registros[-5:],
+        "fecha_ultima": registros[-1]["fecha"],
+    }
 
 
 @app.get("/")
