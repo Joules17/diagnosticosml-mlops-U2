@@ -16,7 +16,8 @@ github: https://github.com/Joules17/mlops-entrega1
 | NO ENFERMO         | Sumatoria < 8              |
 | ENFERMEDAD LEVE    | Sumatoria entre 8 y 22     |
 | ENFERMEDAD AGUDA   | Sumatoria entre 23 y 37    |
-| ENFERMEDAD CRONICA | Sumatoria >= 38            |
+| ENFERMEDAD CRONICA | Sumatoria entre 38 y 44    |
+| ENFERMEDAD TERMINAL| Sumatoria >= 45            |
 
 ---
 
