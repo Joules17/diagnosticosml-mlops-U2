@@ -1,0 +1,70 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comentar inicio en PR
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            CI/CD en acción. Ejecutando tareas …
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt pytest httpx
+
+      - name: Correr pruebas unitarias
+        run: pytest test_main.py -v
+
+      - name: Comentar éxito en PR
+        if: success()
+        uses: thollander/actions-comment-pull-request@v3
+        with:
+          message: |
+            CI/CD terminado con éxito.
+
+  test-and-publish:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt pytest httpx
+
+      - name: Correr pruebas unitarias
+        run: pytest test_main.py -v
+
+      - name: Publicar imagen Docker en GPR
+        uses: machine-learning-apps/gpr-docker-publish@master
+        id: docker
+        with:
+          IMAGE_NAME: 'clasificador-enfermedades'
+          DOCKERFILE_PATH: 'Dockerfile'
+          BUILD_CONTEXT: '.'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
