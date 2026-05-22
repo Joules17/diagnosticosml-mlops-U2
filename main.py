@@ -57,14 +57,14 @@ def clasificar(datos: DatosPaciente) -> str:
 
     sumatoria = sum(presentes)
 
-    if sumatoria < 10:
-        return ESTADOS[0] 
-    elif sumatoria < 25:
-        return ESTADOS[1] 
-    elif sumatoria < 40:
-        return ESTADOS[2] 
+    if sumatoria < 8:
+        return ESTADOS[0]
+    elif sumatoria < 23:
+        return ESTADOS[1]
+    elif sumatoria < 38:
+        return ESTADOS[2]
     else:
-        return ESTADOS[3]  
+        return ESTADOS[3]
 
 
 @app.post(
@@ -76,10 +76,10 @@ def predecir(datos: DatosPaciente):
     """
     Recibe los datos del paciente y retorna la clasificación de su estado de salud:
 
-    - **NO ENFERMO**: sumatoria de síntomas < 10
-    - **ENFERMEDAD LEVE**: sumatoria entre 10 y 24
-    - **ENFERMEDAD AGUDA**: sumatoria entre 25 y 39
-    - **ENFERMEDAD CRÓNICA**: sumatoria >= 40
+    - **NO ENFERMO**: sumatoria de síntomas < 8
+    - **ENFERMEDAD LEVE**: sumatoria entre 8 y 22
+    - **ENFERMEDAD AGUDA**: sumatoria entre 23 y 37
+    - **ENFERMEDAD CRÓNICA**: sumatoria >= 38
     """
     resultado = clasificar(datos)
     return {"clasificacion": resultado}
